@@ -1,0 +1,160 @@
+package gui;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
+import java.awt.Font;
+import javax.swing.JTextField;
+import javax.swing.JPanel;
+import java.awt.CardLayout;
+import javax.swing.JFrame;
+import com.formdev.flatlaf.FlatIntelliJLaf;
+import java.awt.DisplayMode;
+import java.awt.GridLayout;
+import javax.swing.UIManager; 
+import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
+import java.text.DecimalFormat;
+
+public class Main extends JFrame {
+
+    private JTextField display;
+    private double num1 = 0;
+    private String operator = "";
+    private boolean isOperatorClicked = false;
+
+    public Main() {
+        setTitle("Calculator");
+        setSize(350, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        display = new JTextField("0");
+        display.setFont(new Font("Arial", Font.BOLD, 38));
+        display.setHorizontalAlignment(JTextField.RIGHT);
+        display.setEditable(false);
+
+        JPanel jp = new JPanel();
+        jp.setLayout(new CardLayout(0, 20));
+        jp.add(display);
+
+        add(jp, BorderLayout.NORTH);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(6, 4, 2, 2));
+
+        String[] buttons = {
+            "%", "CE", "C", "<",
+            "1/x", "x²", "√", "/",
+            "7", "8", "9", "X",
+            "4", "5", "6", "-",
+            "1", "2", "3", "+",
+            "+/-", "0", ".", "="
+        };
+
+        for (String label : buttons) {
+            JButton btn = new JButton(label);
+            btn.setFont(new Font("Arial", Font.PLAIN, 16));
+            panel.add(btn);
+
+            btn.addActionListener(e -> {
+                String currentText = display.getText();
+
+                switch (label) {
+                    case "0":
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "8":
+                    case "9":
+                        if (display.getText().equals("0") | isOperatorClicked) {
+                            display.setText(label);
+                        } else {
+                            display.setText(display.getText() + label);
+                        }
+                        isOperatorClicked = false;
+                        break;
+
+                    case "+":
+                    case "-":
+                    case "X":
+                    case "/":
+                        num1 = Double.parseDouble(display.getText());
+                        operator = label;
+                        isOperatorClicked = true;
+                        break;
+
+                    case "=":
+                        double num2 = Double.parseDouble(display.getText());
+                        double result = 0;
+
+                        switch (operator) {
+                            case "+":
+                                result = num1 + num2;
+                                break;
+                            case "-":
+                                result = num1 - num2;
+                                break;
+                            case "X":
+                                result = num1 * num2;
+                                break;
+                            case "/":
+                                if (num2 != 0) {
+                                    result = num1 / num2;
+                                } else {
+                                    display.setText("Error");
+                                    return;
+                                }
+                                break;
+                        }
+                        DecimalFormat df = new DecimalFormat("0.######");
+                        display.setText(df.format(result));
+                        break;
+
+                    case "%":
+                        try {
+                            double value = Double.parseDouble(display.getText());
+                            value = value / 100;
+                            display.setText(String.valueOf(value));
+                        } catch (NumberFormatException ex) {
+                            display.setText("Error");
+                        }
+                        break;
+
+                    case "√":
+                        try {
+                            double value = Double.parseDouble(display.getText());
+                            if (value >= 0) {
+                                double sresult = Math.sqrt(value);
+                                DecimalFormat dfc = new DecimalFormat("0.######");
+                                display.setText(dfc.format(sresult));
+                            } else {
+                                display.setText("Error");
+                            }
+                        } catch (NumberFormatException exc) {
+                            display.setText("Error");
+                        }
+                        break;
+
+                    case "C":
+                        display.setText("0");
+                        break;
+
+                }
+            });
+        }
+
+        add(panel, BorderLayout.CENTER);
+
+    }
+
+    public static void main(String[] args) {
+        FlatIntelliJLaf.setup();
+        Main main = new Main();
+        main.setVisible(true);
+    }
+
+}
